@@ -59,7 +59,7 @@ public class WavReader {
     /**
      * Registers a listener that will receive interleaved samples.
      *
-     * @param listener Can be null to existing listener.
+     * @param listener Can be null to remove existing listener.
      */
     public void setOnInterleavedSamplesListener(OnInterleavedSamplesListener listener) {
         onInterleavedSamplesListener = listener;
@@ -68,7 +68,7 @@ public class WavReader {
     /**
      * Registers a listener that will receive non-interleaved samples.
      *
-     * @param listener Can be null to existing listener.
+     * @param listener Can be null to remove existing listener.
      */
     public void setOnNoninterleavedSamplesListener(OnNoninterleavedSamplesListener listener) {
         onNoninterleavedSamplesListener = listener;
