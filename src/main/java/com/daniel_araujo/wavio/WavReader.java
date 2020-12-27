@@ -41,7 +41,7 @@ public class WavReader {
      * @param input
      */
     public void read(byte[] input) {
-        read(ByteBuffer.wrap(input));
+        process(ByteBuffer.wrap(input));
     }
 
     /**
@@ -71,11 +71,11 @@ public class WavReader {
     }
 
     /**
-     * Does all the parsing with our ByteBuffer object.
+     * Does all the parsing.
      *
      * @param input
      */
-    private void read(ByteBuffer input) {
+    private void process(ByteBuffer input) {
         if (state instanceof StateReadNextChunkHeader) {
             StateReadNextChunkHeader stateImpl = (StateReadNextChunkHeader) state;
 
@@ -90,7 +90,7 @@ public class WavReader {
             state = new StateInterpretChunkHeader(chunkHeader);
 
             // Continue.
-            read(input);
+            process(input);
         } else if (state instanceof StateInterpretChunkHeader) {
             StateInterpretChunkHeader stateImpl = (StateInterpretChunkHeader) state;
 
@@ -115,7 +115,7 @@ public class WavReader {
             }
 
             // Continue.
-            read(input);
+            process(input);
         } else if (state instanceof StateRiffChunkIdentifier) {
             StateRiffChunkIdentifier stateImpl = (StateRiffChunkIdentifier) state;
 
@@ -139,7 +139,7 @@ public class WavReader {
             state = new StateReadNextChunkHeader();
 
             // Continue.
-            read(input);
+            process(input);
         } else if (state instanceof StateSkipChunk) {
             StateSkipChunk stateImpl = (StateSkipChunk) state;
 
@@ -161,7 +161,7 @@ public class WavReader {
                 state = new StateReadNextChunkHeader();
             }
 
-            read(input);
+            process(input);
         } else if (state instanceof StateFmtChunk) {
             StateFmtChunk stateImpl = (StateFmtChunk) state;
 
@@ -190,7 +190,7 @@ public class WavReader {
             state = new StateReadNextChunkHeader();
 
             // Continue.
-            read(input);
+            process(input);
         } else if (state instanceof StateDataSamples) {
             StateDataSamples stateImpl = (StateDataSamples) state;
 
