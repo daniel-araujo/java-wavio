@@ -16,6 +16,7 @@ public abstract class ByteBufferUtils {
         int sourceL = source.limit();
 
         ByteBuffer target = ByteBuffer.allocate(source.remaining());
+        target.order(source.order());
         target.put(source);
         target.flip();
 

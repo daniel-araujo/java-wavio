@@ -46,7 +46,9 @@ public class WavReader {
      * @param input
      */
     public void read(byte[] input) {
-        process(ByteBuffer.wrap(input));
+        ByteBuffer buffer = ByteBuffer.wrap(input);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        process(buffer);
     }
 
     /**
@@ -93,9 +95,9 @@ public class WavReader {
         /**
          * Receives samples.
          *
-         * @param samples Each element in the array contains the samples for the corresponding channel.
+         * @param channels Each element in the array contains the samples for the corresponding channel.
          */
-        void onNoninterleavedSamples(ByteBuffer[] samples);
+        void onNoninterleavedSamples(ByteBuffer[] channels);
     }
 
     /**
@@ -255,6 +257,7 @@ public class WavReader {
 
                 if (available > 0) {
                     ByteBuffer samples = input.duplicate();
+                    samples.order(input.order());
                     samples.limit(samples.limit() - incompleteFrameSize);
 
                     onSamples(samples);
@@ -322,6 +325,10 @@ public class WavReader {
 
             for (int c = 0; c < channels; c++) {
                 ByteBuffer channelBuffer = ByteBuffer.allocate(samplesPerChannel * bytesPerSample);
+
+                // Even though we're writing in bytes, making the buffer explicitly little endian allows the user to
+                // convert it to other types, such as ShortBuffer, while preserving the correct order.
+                channelBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
                 for (int i = 0; i < samplesPerChannel; i++) {
                     for (int b = 0; b < bytesPerSample; b++) {

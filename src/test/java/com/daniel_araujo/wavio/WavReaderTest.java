@@ -3,6 +3,7 @@ package com.daniel_araujo.wavio;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -237,6 +238,51 @@ public class WavReaderTest {
     }
 
     @Test
+    public void setOnInterleavedSamplesListener_incompleteFramesByteBufferIsInLittleEndianOrder() {
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2, 3});
+        reader.read(new byte[]{4});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0).order());
+    }
+
+    @Test
+    public void setOnInterleavedSamplesListener_completeFramesByteBufferIsInLittleEndianOrder() {
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2, 3, 4});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0).order());
+    }
+
+    @Test
     public void setOnInterleavedSamplesListener_listenerIsOnlyCalledForCompleteFrames() {
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
@@ -347,6 +393,53 @@ public class WavReaderTest {
         reader.read(new byte[]{5, 6, 7, 8});
 
         assertEquals(1, onSamplesListener.calls.size());
+    }
+
+    @Test
+    public void setOnNoninterleavedSamplesListener_incompleteFrameByteBufferIsInLittleEndian() {
+        OnNoninterleavedSamplesListenerTracker onSamplesListener = new OnNoninterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnNoninterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2, 3});
+        reader.read(new byte[]{4});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0)[0].order());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0)[1].order());
+    }
+
+    @Test
+    public void setOnNoninterleavedSamplesListener_completeFrameByteBufferIsInLittleEndian() {
+        OnNoninterleavedSamplesListenerTracker onSamplesListener = new OnNoninterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnNoninterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2, 3, 4});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0)[0].order());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0)[1].order());
     }
 
     @Test
