@@ -1,0 +1,6 @@
+# Gradle specific files.
+/.gradle
+/gradle
+/gradlew
+/gradlew.bat
+/build
