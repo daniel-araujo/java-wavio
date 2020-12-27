@@ -17,6 +17,20 @@ public class WavReaderTest {
         }
     }
 
+    class OnNoninterleavedSamplesListenerTracker implements WavReader.OnNoninterleavedSamplesListener {
+        public List<ByteBuffer[]> calls = new ArrayList<>();
+
+        public void onNoninterleavedSamples(ByteBuffer[] samples) {
+            ArrayList<ByteBuffer> list = new ArrayList<ByteBuffer>();
+
+            for (int i = 0; i < samples.length; i++) {
+                list.add(i, ByteBufferUtils.deepCopy(samples[i]));
+            }
+
+            calls.add(list.toArray(new ByteBuffer[0]));
+        }
+    }
+
     @Test(expected = WavReader.ChunkNotFoundException.class)
     public void read_throwsExceptionIfRiffChunkIsMissing() {
         WavReader reader = new WavReader();
@@ -333,6 +347,58 @@ public class WavReaderTest {
         reader.read(new byte[]{5, 6, 7, 8});
 
         assertEquals(1, onSamplesListener.calls.size());
+    }
+
+    @Test
+    public void setOnNoninterleavedSamplesListener_eachElementInArrayCorrespondingToChannel() {
+        OnNoninterleavedSamplesListenerTracker onSamplesListener = new OnNoninterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnNoninterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(2, onSamplesListener.calls.get(0).length);
+        assertArrayEquals(new byte[]{1, 2, 5, 6}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[0]));
+        assertArrayEquals(new byte[]{3, 4, 7, 8}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[1]));
+    }
+
+    @Test
+    public void setOnNoninterleavedSamplesListener_incompleteFrameAfterCompleteFrame() {
+        OnNoninterleavedSamplesListenerTracker onSamplesListener = new OnNoninterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnNoninterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2, 3});
+        reader.read(new byte[]{4, 5, 6, 7, 8});
+
+        assertEquals(2, onSamplesListener.calls.size());
+        assertEquals(2, onSamplesListener.calls.get(0).length);
+        assertEquals(2, onSamplesListener.calls.get(1).length);
+        assertArrayEquals(new byte[]{1, 2}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[0]));
+        assertArrayEquals(new byte[]{3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[1]));
+        assertArrayEquals(new byte[]{5, 6}, ByteBufferUtils.toArray(onSamplesListener.calls.get(1)[0]));
+        assertArrayEquals(new byte[]{7, 8}, ByteBufferUtils.toArray(onSamplesListener.calls.get(1)[1]));
     }
 
     @Test

@@ -29,6 +29,11 @@ public class WavReader {
     private OnInterleavedSamplesListener onInterleavedSamplesListener;
 
     /**
+     * Listener that will receive interleaved samples.
+     */
+    private OnNoninterleavedSamplesListener onNoninterleavedSamplesListener;
+
+    /**
      * Creates a new reader. Expects to read a file from the start.
      */
     public WavReader() {
@@ -61,13 +66,36 @@ public class WavReader {
     }
 
     /**
-     * Interface for receiving samples.
+     * Registers a listener that will receive non-interleaved samples.
+     *
+     * @param listener Can be null to existing listener.
+     */
+    public void setOnNoninterleavedSamplesListener(OnNoninterleavedSamplesListener listener) {
+        onNoninterleavedSamplesListener = listener;
+    }
+
+    /**
+     * Interface for receiving interleaved samples.
      */
     public interface OnInterleavedSamplesListener {
         /**
          * Receives samples.
+         *
+         * @param samples
          */
         void onInterleavedSamples(ByteBuffer samples);
+    }
+
+    /**
+     * Interface for receiving non-interleaved samples.
+     */
+    public interface OnNoninterleavedSamplesListener {
+        /**
+         * Receives samples.
+         *
+         * @param samples Each element in the array contains the samples for the corresponding channel.
+         */
+        void onNoninterleavedSamples(ByteBuffer[] samples);
     }
 
     /**
@@ -282,6 +310,32 @@ public class WavReader {
     private void onSamples(ByteBuffer samples) {
         if (onInterleavedSamplesListener != null) {
             onInterleavedSamplesListener.onInterleavedSamples(samples);
+        }
+
+        if (onNoninterleavedSamplesListener != null) {
+            final int channels = format.getChannels();
+            final int frameSize = getFrameSize();
+            final int bytesPerSample = format.getBytesPerSample();
+            final int samplesPerChannel = samples.remaining() / frameSize;
+
+            ByteBuffer[] noninterleavedSamples = new ByteBuffer[channels];
+
+            for (int c = 0; c < channels; c++) {
+                ByteBuffer channelBuffer = ByteBuffer.allocate(samplesPerChannel * bytesPerSample);
+
+                for (int i = 0; i < samplesPerChannel; i++) {
+                    for (int b = 0; b < bytesPerSample; b++) {
+                        final int interleavedIndex = i * frameSize + c * bytesPerSample + b;
+                        final int noninterleavedIndex = i * bytesPerSample + b;
+
+                        channelBuffer.put(noninterleavedIndex, samples.get(samples.position() + interleavedIndex));
+                    }
+                }
+
+                noninterleavedSamples[c] = channelBuffer;
+            }
+
+            onNoninterleavedSamplesListener.onNoninterleavedSamples(noninterleavedSamples);
         }
     }
 
