@@ -1,6 +1,12 @@
 # Wavio
 
-Provides a class that can read audio samples from .wav files.
+Provides a class that can read audio samples from .wav files while being
+efficient with memory, careful about performance, and easy to use.
+
+It can read from input streams, ByteBuffer objects or plain byte arrays.
+
+You can choose to receive stereo samples as interleaved or non-interleaved
+data.
 
 
 ## Installation
@@ -33,15 +39,17 @@ Maven
 Access interleaved samples:
 
 ```java
-// Read file.
-byte[] input = ...
+FileInputStream input = new FileInputStream("audio_file.wav");
 
 WavReader wav = new WavReader();
 
 wav.setOnInterleavedSamplesListener(new WavReader.OnInterleavedSamplesListener() {
     @Override
     public void onInterleavedSamples(ByteBuffer samples) {
-        // Access samples.
+        // Access samples from ByteBuffer. If you don't care about memory
+        // consumption, you can copy all samples to a byte array:
+        byte[] data = new byte[samples.remaining()];
+        samples.get(data);
     }
 });
 
@@ -56,6 +64,8 @@ wav.setOnNoninterleavedSamplesListener(new WavReader.OnNoninterleavedSamplesList
     public void onNoninterleavedSamples(ByteBuffer[] channels) {
         for (int i = 0; i < channels.length; i++) {
             // Access samples from channels[i]
+            byte[] data = new byte[channels[i].remaining()];
+            samples.get(data);
         }
     }
 });
