@@ -2,36 +2,13 @@ package com.daniel_araujo.wavio;
 
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class WavReaderTest {
-    class OnInterleavedSamplesListenerTracker implements WavReader.OnInterleavedSamplesListener {
-        public List<ByteBuffer> calls = new ArrayList<ByteBuffer>();
-
-        public void onInterleavedSamples(ByteBuffer samples) {
-            calls.add(ByteBufferUtils.deepCopy(samples));
-        }
-    }
-
-    class OnNoninterleavedSamplesListenerTracker implements WavReader.OnNoninterleavedSamplesListener {
-        public List<ByteBuffer[]> calls = new ArrayList<>();
-
-        public void onNoninterleavedSamples(ByteBuffer[] samples) {
-            ArrayList<ByteBuffer> list = new ArrayList<ByteBuffer>();
-
-            for (int i = 0; i < samples.length; i++) {
-                list.add(i, ByteBufferUtils.deepCopy(samples[i]));
-            }
-
-            calls.add(list.toArray(new ByteBuffer[0]));
-        }
-    }
-
     @Test(expected = WavReader.ChunkNotFoundException.class)
     public void read_throwsExceptionIfRiffChunkIsMissing() {
         WavReader reader = new WavReader();
@@ -208,6 +185,31 @@ public class WavReaderTest {
             assertEquals(96000, format.getSampleRate());
             assertEquals(8, format.getBitsPerSample());
         }
+    }
+
+    @Test
+    public void read_respectsStartPositionAndLength() {
+        byte[] file = new WavFileHeaderBuilder()
+                .setBitsPerSample(16)
+                .setChannels(2)
+                .setSampleRate(22000)
+                .build();
+
+        WavReader reader = new WavReader();
+
+        reader.read(file, 0, 12);
+
+        assertNull(reader.getDataFormat());
+
+        reader.read(file, 12, 24);
+
+
+        WavReader.DataFormat format = reader.getDataFormat();
+
+        assertNotNull(format);
+        assertEquals(2, format.getChannels());
+        assertEquals(22000, format.getSampleRate());
+        assertEquals(16, format.getBitsPerSample());
     }
 
     @Test

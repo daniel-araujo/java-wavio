@@ -52,6 +52,21 @@ public class WavReader {
     }
 
     /**
+     * Reads data. Will call appropriate listeners as contents are parsed.
+     *
+     * @param input
+     * @param index Where to start reading.
+     * @param length How many bytes to read.
+     */
+    public void read(byte[] input, int index, int length) {
+        ByteBuffer buffer = ByteBuffer.wrap(input);
+        buffer.position(index);
+        buffer.limit(index + length);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        process(buffer);
+    }
+
+    /**
      * @return Sample format.
      */
     public DataFormat getDataFormat() {
