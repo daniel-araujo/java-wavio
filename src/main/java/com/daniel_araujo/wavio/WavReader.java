@@ -1,5 +1,7 @@
 package com.daniel_araujo.wavio;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -64,6 +66,24 @@ public class WavReader {
         buffer.limit(index + length);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         process(buffer);
+    }
+
+    /**
+     * Reads data from input stream.
+     *
+     * @param input
+     */
+    public void read(InputStream input) {
+        try {
+            byte[] buffer = new byte[1024];
+            int length = 0;
+            while ((length = input.read(buffer)) != -1) {
+                read(buffer, 0, length);
+            }
+        } catch (java.io.IOException ex) {
+            // We wrap it in our own exception object.
+            throw new IOException(ex);
+        }
     }
 
     /**
@@ -399,11 +419,21 @@ public class WavReader {
         Exception(String message) {
             super(message);
         }
+
+        Exception(java.lang.Exception ex) {
+            super(ex);
+        }
     }
 
     public static class ChunkNotFoundException extends Exception {
         ChunkNotFoundException(String typeId) {
             super("Chunk with type id " + typeId + " not found.");
+        }
+    }
+
+    public static class IOException extends Exception {
+        IOException(java.io.IOException ex) {
+            super(ex);
         }
     }
 

@@ -213,6 +213,27 @@ public class WavReaderTest {
     }
 
     @Test
+    public void read_readEntireFileStream() {
+        byte[] header = new WavFileHeaderBuilder()
+                .setBitsPerSample(16)
+                .setChannels(2)
+                .setSampleRate(22000)
+                .build();
+        InputStream file = new ByteArrayInputStream(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(file);
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+    }
+
+    @Test
     public void setOnInterleavedSamplesListener_listenerIsCalledWhenNewSamplesAreRead() {
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
