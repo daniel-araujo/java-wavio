@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import static org.junit.Assert.*;
@@ -231,6 +232,70 @@ public class WavReaderTest {
 
         assertEquals(1, onSamplesListener.calls.size());
         assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+    }
+
+    @Test
+    public void read_ByteBuffer_updatesPositionAfterReadingData() {
+        byte[] header = new WavFileHeaderBuilder()
+                .setBitsPerSample(16)
+                .setChannels(2)
+                .setSampleRate(22000)
+                .build();
+        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(buffer);
+
+        assertEquals(buffer.limit(), buffer.position());
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+    }
+
+    @Test
+    public void read_ByteBuffer_doesNotChangeOrderToLittleEndian() {
+        byte[] header = new WavFileHeaderBuilder()
+                .setBitsPerSample(16)
+                .setChannels(2)
+                .setSampleRate(22000)
+                .build();
+        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+
+        WavReader reader = new WavReader();
+
+        buffer.order(ByteOrder.BIG_ENDIAN);
+
+        reader.read(buffer);
+
+        assertEquals(ByteOrder.BIG_ENDIAN, buffer.order());
+    }
+
+    @Test
+    public void read_ByteBuffer_callsListenersWithLittleEndianByteBuffer() {
+        byte[] header = new WavFileHeaderBuilder()
+                .setBitsPerSample(16)
+                .setChannels(2)
+                .setSampleRate(22000)
+                .build();
+        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(buffer);
+
+        assertEquals(buffer.limit(), buffer.position());
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0).order());
     }
 
     @Test

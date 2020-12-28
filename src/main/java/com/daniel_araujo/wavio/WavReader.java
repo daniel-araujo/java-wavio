@@ -87,6 +87,20 @@ public class WavReader {
     }
 
     /**
+     * Reads remaining bytes from ByteBuffer. Updates position.
+     *
+     * @param input
+     */
+    public void read(ByteBuffer input) {
+        // Gotta duplicate so we can use little endian without affecting the
+        // original byte order.
+        ByteBuffer buffer = input.duplicate();
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        process(buffer);
+        input.position(buffer.position());
+    }
+
+    /**
      * @return Sample format.
      */
     public DataFormat getDataFormat() {
@@ -296,6 +310,8 @@ public class WavReader {
                     samples.limit(samples.limit() - incompleteFrameSize);
 
                     onSamples(samples);
+
+                    input.position(input.limit() - incompleteFrameSize);
                 }
 
                 if (incompleteFrameSize > 0) {
