@@ -65,7 +65,7 @@ wav.setOnNoninterleavedSamplesListener(new WavReader.OnNoninterleavedSamplesList
         for (int i = 0; i < channels.length; i++) {
             // Access samples from channels[i]
             byte[] data = new byte[channels[i].remaining()];
-            samples.get(data);
+            channels[i].get(data);
         }
     }
 });
