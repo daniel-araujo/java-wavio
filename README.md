@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.daniel-araujo.wavio:wavio:1.0.0'
+    implementation 'com.daniel-araujo.wavio:wavio:1.1.0'
 }
 ```
 

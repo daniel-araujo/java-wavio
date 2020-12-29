@@ -6,7 +6,7 @@
 
   <groupId>com.daniel-araujo.wavio</groupId>
   <artifactId>wavio</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 
   <name>Wavio</name>
   <description>Provides a class that can read audio samples from .wav files.</description>
