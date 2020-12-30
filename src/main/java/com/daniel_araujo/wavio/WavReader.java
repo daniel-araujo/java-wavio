@@ -226,7 +226,7 @@ public class WavReader {
                 return;
             }
 
-            int toSkip = stateImpl.header.length - stateImpl.skipped;
+            int toSkip = realChunkSize(stateImpl.header.length) - stateImpl.skipped;
 
             if (toSkip > input.remaining()) {
                 toSkip = input.remaining();
@@ -236,7 +236,7 @@ public class WavReader {
 
             stateImpl.skipped += toSkip;
 
-            if (stateImpl.skipped == stateImpl.header.length) {
+            if (stateImpl.skipped == realChunkSize(stateImpl.header.length)) {
                 state = new StateReadNextChunkHeader();
             }
 
@@ -395,6 +395,17 @@ public class WavReader {
 
             onNoninterleavedSamplesListener.onNoninterleavedSamples(noninterleavedSamples);
         }
+    }
+
+    /**
+     * This is meant to be used with chunk sizes. RIFF chunks whose size is
+     * not even must contain a pad byte at the end. This method will return
+     * the size of the chunk with the pad byte included.
+     *
+     * @return
+     */
+    private int realChunkSize(int size) {
+        return size + ((size % 2) != 0 ? 1 : 0);
     }
 
     /**

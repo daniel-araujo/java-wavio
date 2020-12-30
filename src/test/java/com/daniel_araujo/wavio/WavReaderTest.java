@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -296,6 +297,33 @@ public class WavReaderTest {
 
         assertEquals(1, onSamplesListener.calls.size());
         assertEquals(ByteOrder.LITTLE_ENDIAN, onSamplesListener.calls.get(0).order());
+    }
+
+    @Test
+    public void read_ignoresPadByteWhenChunkLengthIsNotEven() {
+        byte[] header = new WavFileHeaderBuilder()
+                .setBitsPerSample(16)
+                .setChannels(2)
+                .setSampleRate(22000)
+                .build();
+
+        byte[] commentChunk = new byte[]{'I', 'C', 'M', 'T', 3, 0, 0, 0, 'O', 'D', 'D', 0};
+
+        byte[] data = new byte[] { 1, 2, 3, 4 };
+
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(Arrays.copyOfRange(header, 0, 36));
+        reader.read(commentChunk);
+        reader.read(Arrays.copyOfRange(header, 36, 44));
+        reader.read(data);
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertArrayEquals(data, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
     }
 
     @Test
