@@ -485,6 +485,36 @@ public class WavReaderTest {
     }
 
     @Test
+    public void setOnInterleavedSamplesListener_onlyCallsListenerWhenFrameIsComplete() {
+        OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnInterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2});
+
+        assertEquals(0, onSamplesListener.calls.size());
+
+        reader.read(new byte[]{3});
+
+        assertEquals(0, onSamplesListener.calls.size());
+
+        reader.read(new byte[]{4});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+    }
+
+    @Test
     public void setOnInterleavedSamplesListener_setNullToRemoveListener() {
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
@@ -608,6 +638,38 @@ public class WavReaderTest {
         assertArrayEquals(new byte[]{3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[1]));
         assertArrayEquals(new byte[]{5, 6}, ByteBufferUtils.toArray(onSamplesListener.calls.get(1)[0]));
         assertArrayEquals(new byte[]{7, 8}, ByteBufferUtils.toArray(onSamplesListener.calls.get(1)[1]));
+    }
+
+    @Test
+    public void setOnNoninterleavedSamplesListener_onlyCallsListenerWhenFrameIsComplete() {
+        OnNoninterleavedSamplesListenerTracker onSamplesListener = new OnNoninterleavedSamplesListenerTracker();
+
+        WavReader reader = new WavReader();
+
+        reader.setOnNoninterleavedSamplesListener(onSamplesListener);
+
+        reader.read(
+                new WavFileHeaderBuilder()
+                        .setBitsPerSample(16)
+                        .setChannels(2)
+                        .setSampleRate(8000)
+                        .build()
+        );
+
+        reader.read(new byte[]{1, 2});
+
+        assertEquals(0, onSamplesListener.calls.size());
+
+        reader.read(new byte[]{3});
+
+        assertEquals(0, onSamplesListener.calls.size());
+
+        reader.read(new byte[]{4});
+
+        assertEquals(1, onSamplesListener.calls.size());
+        assertEquals(2, onSamplesListener.calls.get(0).length);
+        assertArrayEquals(new byte[]{1, 2}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[0]));
+        assertArrayEquals(new byte[]{3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)[1]));
     }
 
     @Test
