@@ -291,7 +291,12 @@ public class WavReader {
                     stateImpl.incompleteFrame.position(0);
                     stateImpl.incompleteFrame.limit(frameSize);
 
-                    onSamples(stateImpl.incompleteFrame);
+                    // Duplicated so that our ByteBuffer object is not affected.
+                    ByteBuffer samples = stateImpl.incompleteFrame.duplicate();
+                    samples.order(stateImpl.incompleteFrame.order());
+                    onSamples(samples);
+
+                    stateImpl.incompleteFrame.limit(stateImpl.incompleteFrame.capacity());
                 } else {
                     stateImpl.incompleteFrame.put(input);
                     // Not enough data.

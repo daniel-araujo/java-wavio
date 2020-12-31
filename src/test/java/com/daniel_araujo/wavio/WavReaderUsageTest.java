@@ -32,7 +32,7 @@ public class WavReaderUsageTest {
         }
 
         assertEquals(1, onSamplesListener.calls.size());
-        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.getArray(onSamplesListener.calls.get(0)));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class WavReaderUsageTest {
         reader.read(file);
 
         assertEquals(1, onSamplesListener.calls.size());
-        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.getArray(onSamplesListener.calls.get(0)));
     }
 
     @Test
@@ -80,9 +80,9 @@ public class WavReaderUsageTest {
         reader.read(data3);
 
         assertEquals(3, onSamplesListener.calls.size());
-        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
-        assertArrayEquals(new byte[]{5, 6, 7, 8}, ByteBufferUtils.toArray(onSamplesListener.calls.get(1)));
-        assertArrayEquals(new byte[]{9, 10, 11, 12}, ByteBufferUtils.toArray(onSamplesListener.calls.get(2)));
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.getArray(onSamplesListener.calls.get(0)));
+        assertArrayEquals(new byte[]{5, 6, 7, 8}, ByteBufferUtils.getArray(onSamplesListener.calls.get(1)));
+        assertArrayEquals(new byte[]{9, 10, 11, 12}, ByteBufferUtils.getArray(onSamplesListener.calls.get(2)));
     }
 
     @Test
@@ -103,6 +103,6 @@ public class WavReaderUsageTest {
         reader.read(buffer);
 
         assertEquals(1, onSamplesListener.calls.size());
-        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.toArray(onSamplesListener.calls.get(0)));
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteBufferUtils.getArray(onSamplesListener.calls.get(0)));
     }
 }

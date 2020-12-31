@@ -7,11 +7,22 @@ import java.util.List;
 class OnNoninterleavedSamplesListenerTracker implements WavReader.OnNoninterleavedSamplesListener {
     public List<ByteBuffer[]> calls = new ArrayList<>();
 
-    public void onNoninterleavedSamples(ByteBuffer[] samples) {
+    /**
+     * Controls whether the listener will move the position of the ByteBuffer object to the limit.
+     */
+    public boolean consume = true;
+
+    public void onNoninterleavedSamples(ByteBuffer[] channels) {
         ArrayList<ByteBuffer> list = new ArrayList<ByteBuffer>();
 
-        for (int i = 0; i < samples.length; i++) {
-            list.add(i, ByteBufferUtils.deepCopy(samples[i]));
+        for (int i = 0; i < channels.length; i++) {
+            ByteBuffer samples = channels[i];
+
+            list.add(i, ByteBufferUtils.deepCopy(samples));
+
+            if (consume) {
+                samples.position(samples.limit());
+            }
         }
 
         calls.add(list.toArray(new ByteBuffer[0]));

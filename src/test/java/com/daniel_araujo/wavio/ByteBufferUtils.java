@@ -30,17 +30,14 @@ public abstract class ByteBufferUtils {
      * Extracts contents of a ByteBuffer into an array.
      * <p>
      * Basically like reading from current position up to limit.
-     * <p>
-     * The original buffer will keep its position intact.
      *
      * @param source
      * @return
      */
-    public static byte[] toArray(ByteBuffer source) {
+    public static byte[] getArray(ByteBuffer source) {
         int sourceP = source.position();
         byte[] arr = new byte[source.remaining()];
         source.get(arr);
-        source.position(sourceP);
         return arr;
     }
 }
