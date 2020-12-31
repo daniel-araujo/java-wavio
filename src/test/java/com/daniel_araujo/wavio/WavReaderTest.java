@@ -221,7 +221,7 @@ public class WavReaderTest {
                 .setChannels(2)
                 .setSampleRate(22000)
                 .build();
-        InputStream file = new ByteArrayInputStream(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+        InputStream file = new ByteArrayInputStream(ArrayUtils.concat(header, new byte[]{1, 2, 3, 4}));
 
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
@@ -242,7 +242,7 @@ public class WavReaderTest {
                 .setChannels(2)
                 .setSampleRate(22000)
                 .build();
-        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte[]{1, 2, 3, 4}));
 
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
@@ -265,7 +265,7 @@ public class WavReaderTest {
                 .setChannels(2)
                 .setSampleRate(22000)
                 .build();
-        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte[]{1, 2, 3, 4}));
 
         WavReader reader = new WavReader();
 
@@ -283,7 +283,7 @@ public class WavReaderTest {
                 .setChannels(2)
                 .setSampleRate(22000)
                 .build();
-        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte [] { 1, 2, 3, 4 }));
+        ByteBuffer buffer = ByteBuffer.wrap(ArrayUtils.concat(header, new byte[]{1, 2, 3, 4}));
 
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
@@ -309,7 +309,7 @@ public class WavReaderTest {
 
         byte[] commentChunk = new byte[]{'I', 'C', 'M', 'T', 3, 0, 0, 0, 'O', 'D', 'D', 0};
 
-        byte[] data = new byte[] { 1, 2, 3, 4 };
+        byte[] data = new byte[]{1, 2, 3, 4};
 
         OnInterleavedSamplesListenerTracker onSamplesListener = new OnInterleavedSamplesListenerTracker();
 
