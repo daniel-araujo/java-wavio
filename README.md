@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.daniel-araujo.wavio:wavio:1.1.0'
+    implementation 'com.daniel-araujo.wavio:wavio:1.2.0'
 }
 ```
 
@@ -29,7 +29,7 @@ Maven
 <dependency>
     <groupId>com.daniel-araujo.wavio</groupId>
     <artifactId>wavio</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
